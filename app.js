@@ -1,12 +1,17 @@
+/* eslint-disable prefer-const */
 /* eslint-disable indent */
 /* eslint-disable semi */
 /* eslint-disable quotes */
+let csrf = require("csurf");
+let cookieParser = require("cookie-parser");
 const express = require("express");
 const app = express();
 const { Todo } = require("./models");
 const bodyParser = require("body-parser");
 const path = require("path");
 app.use(bodyParser.json());
+app.use(cookieParser("Neeku enduku ra!.."));
+app.use(csrf({ cookie: true }));
 
 app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, "public")));
@@ -17,7 +22,7 @@ app.get("/", async (request, response) => {
     const dueToday = await Todo.dueToday();
     const dueLater = await Todo.dueLater();
     if (request.accepts("html")) {
-      response.render('index', { overDue, dueToday, dueLater });
+      response.render('index', { overDue, dueToday, dueLater, csrfToken: request.csrfToken() });
     } else {
       response.json({ overDue, dueToday, dueLater });
     }
