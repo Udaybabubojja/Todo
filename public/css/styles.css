@@ -1,10 +1,10 @@
 body {
-    background: aqua;
+    font-family: sans-serif;
+    background: #ffffff;
 }
-td{
-    padding: 10px;
+
+
+.Todo-Item:hover .trash-icon {
+    display: block;
 }
-th td{
-    border: 1px solid black;
-    font-weight: bold;
-}
+

@@ -10,12 +10,16 @@ app.use(bodyParser.json());
 
 app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, "public")));
+app.use(express.urlencoded({ extended: false }))
+
 app.get("/", async (request, response) => {
-    const allTodos = await Todo.getTodos();
+    const overDue = await Todo.overDue();
+    const dueToday = await Todo.dueToday();
+    const dueLater = await Todo.dueLater();
     if (request.accepts("html")) {
-      response.render('index', { allTodos });
+      response.render('index', { overDue, dueToday, dueLater });
     } else {
-      response.json(allTodos);
+      response.json({ overDue, dueToday, dueLater });
     }
 })
 
@@ -32,12 +36,12 @@ app.get("/todos", async (request, response) => {
 app.post("/todos", async (request, response) => {
   console.log("post method..");
   try {
-    const todo = await Todo.create({
+    await Todo.create({
       title: request.body.title,
       dueDate: request.body.dueDate,
       completed: false
     });
-    return response.json(todo);
+    return response.redirect("/");
   } catch (error) {
     console.error(error);
     return response.status(422).json(error);
@@ -63,13 +67,7 @@ app.put("/todos/:id/markAsCompleted", async (request, response) => {
 app.delete("/todos/:id", async (request, response) => {
     console.log("Deleted id: ", request.params.id);
     try {
-        const todo = await Todo.findByPk(request.params.id);
-
-        if (!todo) {
-            return response.status(404).json({ error: 'Todo not found' });
-        }
-
-        await todo.destroy();
+        await Todo.remove(request.params.id);
         return response.json({ success: true });
     } catch (error) {
         console.error(error);
