@@ -1,0 +1,10 @@
+body {
+    background: aqua;
+}
+td{
+    padding: 10px;
+}
+th td{
+    border: 1px solid black;
+    font-weight: bold;
+}
