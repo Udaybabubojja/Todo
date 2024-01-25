@@ -6,106 +6,20 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="csrf-token" content="<%= csrfToken %>">
         <script src="https://cdn.tailwindcss.com"></script>
-        <script>
-            var token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            function updateTodo(id) {
-                fetch(`/todos/${id}`, {
-                    method: "put",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        _csrf: token,
-                        completed: true
-                    })
-                })
-                .then((res)=>{
-                    if (res.ok){
-                        window.location.reload();
-                    }
-                })
-                .catch((err)=> { console.error(err) });
-            }
-            function deleteTodo(id){
-                fetch(`/todos/${id}`, {
-                    method: "delete",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        _csrf: token,
-                    })
-                })
-                .then((res)=>{
-                    if (res.ok){
-                        window.location.reload();
-                    }
-                })
-                .catch((err)=> { console.error(err) });
-            }
-        </script>
     </head>
-    <!-- <body>
-        <%- include('header.ejs') %>
-        <h1 class="text-2xl font-semibold text-gray-600"> My Todo-list</h1>
-        <h1>OverDue</h1>
-        <table>
-            <% for(var i=0; i<overDue.length; i++){ %>
-                <tr>
-                    <td><%= overDue[i].title %></td>
-                    <td><%= overDue[i].dueDate %></td>
-                    <td><%= overDue[i].completed %></td>
-                </tr>
-                <% } %>
-            </table>
-            <h1>Due Today</h1>
-            <table>
-                <% for(var i=0; i<dueToday.length; i++){ %>
-                    <tr>
-                        <td><%= dueToday[i].title %></td>
-                        <td><%= dueToday[i].dueDate %></td>
-                        <td><%= dueToday[i].completed %></td>
-                    </tr>
-                    <% } %>
-                </table>
-                <h1>Due Later</h1>
-                <table>
-                    <% for(var i=0; i<dueLater.length; i++){ %>
-                        <tr>
-                            <td><%= dueLater[i].dueDate %></td>
-                            <td><%= dueLater[i].title %></td>
-                            <td><%= dueLater[i].completed %></td>
-                        </tr>
-                        <% } %>
-                    </table>
-                </body> -->
         <body>
             <h1 class="text-2xl font-semibold text-gray-600"> My Todo-list</h1>
             <div class="grid grid-cols-6"> 
                 <div class="col-start-3 col-span-2">
                     <%- include('header.ejs') %> 
+                    <p class="py-2 ">Welcome to the TO_DO Manager</p>
+                    <p class="py-2 ">New User? <a href="/signup" class="text-green-600">Sign up</a></p>
+                    <p class="py-2 ">Already have an account? <a href="/login" class="text-green-600">Login</a></p>
+                    
                 </div> 
             </div>
-            <form action="/todos" method="post" >
-                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                <div class="flex gap-2 py-4">
-                    <div class="flex-auto w-64">
-                        <input type="text" name="title" class="border boder-gray-300 text-gray-900 text -sm rounded w-full p-2" placeholder="What's next?" autofocus required>
-                    </div>
-                    <div class="flex-auto w-32">
-                        <input type="date" name="dueDate" id="" class="border boder-gray-300 text-gray-900 text -sm rounded w-full p-2 leading-4" required >
-                    </div>
-                    <div>
-                        <button type="submit" class="text-white bg-green-600 hover:bg-green-800 font-medium rounded text-sm px-5 py-2 mr-2 mb-2">Add Work</button>
-                    </div>
-                </div>
-            </form>
-            <div class="mt-2">
-                <h3>Over Due (<%= overDue.length %> Todos)</h3>
-                <%- include('todos.ejs', { todos: overDue }) %>
-        
-                <h3>Due Today (<%= dueToday.length %> Todos)</h3>
-                <%- include('todos.ejs', { todos: dueToday }) %>
-        
-                <h3>Due Later (<%= dueLater.length %> Todos)</h3>
-                <%- include('todos.ejs', { todos: dueLater }) %>
-            </div>
+            
+            
             
         </body>
 </html>

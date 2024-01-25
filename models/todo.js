@@ -2,6 +2,8 @@
 const {
   Model
 } = require('sequelize');
+const { Op } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
   class Todo extends Model {
     /**
@@ -11,10 +13,13 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Todo.belongsTo(models.User, {
+        foreignKey:'userId'
+      })
 
     }
-    static addTodo({title, dueDate}){
-      return this.create({title:title, dueDate: dueDate, completed: false});
+    static addTodo({title, dueDate, userId}){
+      return this.create({title:title, dueDate: dueDate, completed: false, userId});
     }
     static async getTodos() {
       try {
@@ -25,45 +30,68 @@ module.exports = (sequelize, DataTypes) => {
       }
     }
     
-    static async overDue() {
+    static async overDue(userId) {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const todos = await this.getTodos();
-      return todos.filter((item) =>  new Date(item.dueDate).setHours(0, 0, 0, 0) < today);
+      return this.findAll({
+        where: {
+          userId,
+          completed: false,
+          dueDate: {
+            [Op.lt]: today
+          }
+        }
+      });
     }
     
-    static async dueToday() {
-      try {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); // Set to midnight
-        const todos = await this.getTodos();
-        const dueTodayTodos = todos.filter(
-          (item) => {
-            const todoDueDate = new Date(item.dueDate);
-            todoDueDate.setHours(0, 0, 0, 0); 
-            return todoDueDate.toISOString() === today.toISOString();
-          }
-        );
-        return dueTodayTodos;
-      } catch (error) {
-        throw error;
-      }
-    }
-
-    static async dueLater() {
+    static async dueToday(userId) {
       const today = new Date();
-      const todos = await this.getTodos();
-      return todos.filter((item) => new Date(item.dueDate).setHours(0, 0, 0, 0) > today);
-    }
-
-    static async remove(id){
-      return this.destroy({
-        where:{
-          id,
+      today.setHours(0, 0, 0, 0);
+      return this.findAll({
+        where: {
+          userId,
+          completed: false,
+          dueDate: {
+            [Op.eq]: today
+          }
         }
-      })
+      });
     }
-
+    
+    static async dueLater(userId) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return this.findAll({
+        where: {
+          userId,
+          completed: false,
+          dueDate: {
+            [Op.gt]: today
+          }
+        }
+      });
+    }
+    
+    static async remove(id, userId){
+      return this.update({
+        completed: false
+      }, {
+        where: {
+          id,
+          userId
+        }
+      });
+    }
+    
+    static async completedItems(userId) {
+      return this.findAll({
+        where: {
+          userId,
+          completed: true
+        }
+      });
+    }
+    
     markAsCompleted() {
       return this.update({completed: true});
     }
