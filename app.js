@@ -2,7 +2,7 @@
 /* eslint-disable indent */
 /* eslint-disable semi */
 /* eslint-disable quotes */
-let csrf = require("csurf");
+let csrf = require("tiny-csrf");
 let cookieParser = require("cookie-parser");
 const express = require("express");
 const app = express();
@@ -10,12 +10,13 @@ const { Todo } = require("./models");
 const bodyParser = require("body-parser");
 const path = require("path");
 app.use(bodyParser.json());
-app.use(cookieParser("Neeku enduku ra!.."));
-app.use(csrf({ cookie: true }));
-
 app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({ extended: false }))
+
+// after the express.urlencoded the below 2 lines should there
+app.use(cookieParser("Something is there"));
+app.use(csrf("this_should_be_32_character_long", ["POST", "PUT", "DELETE"]));
 
 app.get("/", async (request, response) => {
     const overDue = await Todo.overDue();
@@ -53,7 +54,7 @@ app.post("/todos", async (request, response) => {
   }
 });
 
-app.put("/todos/:id/markAsCompleted", async (request, response) => {
+app.put("/todos/:id", async (request, response) => {
   console.log("we have id: ", request.params.id);
   try {
     const todo = await Todo.findByPk(request.params.id);
