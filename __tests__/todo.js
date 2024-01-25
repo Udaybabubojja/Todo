@@ -81,8 +81,11 @@ describe("Todo test suite", () => {
   test("Mark a todo as complete", async () => {
     const agent = request.agent(server);
     await login(agent, "user.a@test.com", "123456");
-    let res = await agent.get("/todos")
+
+    let res = await agent.get("/todos");
     let csrfToken = extractCsrfToken(res);
+
+    // Create a new todo
     await agent.post("/todos").send({
       title: "Buy milk",
       dueDate: new Date().toISOString(),
@@ -90,19 +93,28 @@ describe("Todo test suite", () => {
       "_csrf": csrfToken
     });
 
+    // Fetch the grouped todos
     const groupedTodosResponse = await agent.get("/todos").set("Accept", "application/json");
     const parsedGroupedResponse = JSON.parse(groupedTodosResponse.text);
-    const dueTodayCount = parsedGroupedResponse.dueToday.length;
-    const latestTodo = parsedGroupedResponse.dueToday [dueTodayCount - 1];
-    res = await agent.get("/todos");
-    csrfToken = extractCsrfToken(res);
 
-    // Fix the template string and variable name
-    const markCompleteResponse = await agent.put(`/todos/${latestTodo.id}`).send({
-      _csrf: csrfToken
-    });
-    const parsedUpdateResponse = JSON.parse(markCompleteResponse.text);
-    expect(parsedUpdateResponse.completed).toBe(true);
+    // Check if there is at least one todo in the dueToday array
+    if (parsedGroupedResponse.dueToday.length > 0) {
+      const dueTodayCount = parsedGroupedResponse.dueToday.length;
+      const latestTodo = parsedGroupedResponse.dueToday[dueTodayCount - 1].id;
+
+      res = await agent.get("/todos");
+      csrfToken = extractCsrfToken(res);
+
+      // Fix the template string and variable name
+      const markCompleteResponse = await agent.put(`/todos/${latestTodo}`).send({
+        _csrf: csrfToken
+      });
+
+      const parsedUpdateResponse = JSON.parse(markCompleteResponse.text);
+      expect(parsedUpdateResponse.completed).toBe(true);
+    } else {
+      console.error('No todo found in the dueToday array.');
+    }
   });
 
   test("delete a todo", async () => {

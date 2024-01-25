@@ -24,6 +24,8 @@ app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser("Something is there"));
 app.use(csrf("this_should_be_32_character_long", ["POST", "PUT", "DELETE"]));
 
+const flash = require("connect-flash");
+
 app.use(session({
   secret: "my_secret_key1332141",
   cookie: {
@@ -32,7 +34,12 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
-
+app.set("views", path.join(__dirname, "views"));
+app.use(flash());
+app.use(function (request, response, next) {
+  response.locals.messages = request.flash();
+  next();
+})
 passport.use(new LocalStrategy({
   usernameField: 'email',
   passwordField: 'password'
@@ -46,7 +53,7 @@ passport.use(new LocalStrategy({
     if (result) {
       return done(null, user);
     } else {
-      return done("Invalid Password");
+      return done(null, false, { message: "Invalid Password" });
     }
   }).catch((error) => {
     return (error);
@@ -104,7 +111,7 @@ app.get("/login", (request, response) => {
   response.render("login", { title: "login", csrfToken: request.csrfToken() });
 })
 
-app.post("/session", passport.authenticate('local', { failureRedirect: '/' }), (request, response) => {
+app.post("/session", passport.authenticate('local', { failureRedirect: '/login', failureFlash: true }), (request, response) => {
   console.log(request.user);
   response.redirect("/todos");
 })
@@ -176,7 +183,8 @@ app.delete("/todos/:id", connectEnsureLogin.ensureLoggedIn(), async (request, re
           await Todo.create({
               title: todo.title,
               dueDate: todo.dueDate,
-              completed: false
+              completed: false,
+              userId: loggedInUser
           });
       }
       await Todo.remove(request.params.id, loggedInUser);

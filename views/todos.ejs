@@ -108,6 +108,16 @@
                         <h3>Completed Items (<%= completedItems.length %> Todos)</h3>
                         <%- include('todo.ejs', { todos: completedItems }) %>
                     </div>
+                    <% if (messages && messages.error && messages.error.length > 0) { %>
+                        <div class="py-3 text-red-500">
+                            <strong>Error:</strong>
+                            <ul>
+                                <% for (var i = 0; i < messages.error.length; i++) { %>
+                                    <li><%= messages.error[i] %></li>
+                                <% } %>
+                            </ul>
+                        </div>
+                    <% } %>
                 </div> 
             </div>
             

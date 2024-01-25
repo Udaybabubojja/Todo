@@ -25,8 +25,18 @@
                 <div class="py-3" >
                     <button type="submit"  class="text-white bg-green-500 hover:bg-green-900 font-medium rounded px-5 py-2">Login </button>
                 </div>
-                
             </form>
+            <% if (messages && messages.error && messages.error.length > 0) { %>
+                <div class="py-3 text-red-500">
+                    <strong>Error:</strong>
+                    <ul>
+                        <% for (var i = 0; i < messages.error.length; i++) { %>
+                            <li><%= messages.error[i] %></li>
+                        <% } %>
+                    </ul>
+                </div>
+            <% } %>
+            <p class="py-2">New User? <a href="/signup" class="text-green-600">Sign up</a></p>
         </div>
     </div>
 </body>
